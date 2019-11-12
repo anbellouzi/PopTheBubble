@@ -23,6 +23,20 @@ class GameScene: SKScene {
         return label
     }()
     
+    //Set up properties of the missedLabel
+    var missedLabel: SKLabelNode = {
+        let label = SKLabelNode()
+        label.text = "0"
+        label.color = .white
+        label.fontSize = 50
+        
+        return label
+    }()
+    
+    struct game {
+        static var IsOver : Bool = false
+    }
+    
     override func didMove(to view: SKView) {
         //Called when the scene has been displayed
         
@@ -37,6 +51,7 @@ class GameScene: SKScene {
     
     override func update(_ currentTime: TimeInterval) {
         // Called before each frame is rendered
+        
     }
     
     func labelSetUp() {
@@ -44,6 +59,7 @@ class GameScene: SKScene {
         scoreLabel.position.y = view!.bounds.height - 80
         addChild(scoreLabel)
     }
+    
     
     func randomNumber()-> CGFloat {
         //Width of the SKScene's view
@@ -90,6 +106,17 @@ class GameScene: SKScene {
         square.run(animations)
     }
     
+//    source code: https://stackoverflow.com/questions/37126494/swift-spritekit-segue-between-gameviewcontroller-and-mainviewcontroller-after
+    
+    
+    func goToGameScene(){
+        let gameScene:GameScene = GameScene(size: self.view!.bounds.size) // create your new scene
+        let transition = SKTransition.fade(withDuration: 3.0) // create type of transition (you can check in documentation for more transtions)
+        gameScene.scaleMode = SKSceneScaleMode.fill
+        self.view!.presentScene(gameScene, transition: transition)
+        score = 0
+    }
+    
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         //Loop through an array of touch values
         for touch in touches {
@@ -101,11 +128,23 @@ class GameScene: SKScene {
             let nodeFound = self.atPoint(positionInScene)
             let name = nodeFound.name
             
+            
+        
+            
             //Check if there is an node there.
             if name == "one" {
                 //TODO: Remove the square
                 //Remove node from parent view
+                missedLabel.removeFromParent()
+                missedLabel.position = positionInScene
+                if ((missedLabel.parent) == nil) {
+                    addChild(missedLabel)
+                }
+                
+                missedLabel.text = "+1"
+                
                 nodeFound.removeFromParent()
+                
                 
                 //Increase the score by one
                 score += 1
@@ -113,6 +152,26 @@ class GameScene: SKScene {
                 
                 //Create the square again with the same name
                 createSquares(name: name!)
+            }
+            else {
+                score -= 1
+                scoreLabel.text = String(score)
+                missedLabel.position = positionInScene
+                if ((missedLabel.parent) == nil) {
+                    addChild(missedLabel)
+                }
+            
+                missedLabel.text = "Missed"
+                
+                
+                
+                if score < 0 {
+                    scoreLabel.text = String("Game is Over")
+                    missedLabel.removeFromParent()
+                    
+                    
+                    goToGameScene()
+                }
             }
         }
     }
